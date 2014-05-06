@@ -1,0 +1,112 @@
+<% if @layout != "no" %>
+<script>
+$(document).ready(function()
+{	
+		$("input#fb").attr("checked",<%= @fbtick %>)
+		$("input#tw").attr("checked",<%= @twtick %>)
+		$("input#ig").attr("checked",<%= @igtick %>)
+		$("input#gp").attr("checked",<%= @gtick %>)
+		//console.log("<%= @fbtick %>")
+		//console.log("<%= @twtick %>")
+		//console.log("<%= @igtick %>")
+		//console.log("<%= @gtick %>")
+		//$("input#message").attr("checked",<%= @fbtick %>)
+		//$("input#photo").attr("checked",<%= @twtick %>)
+		//$("input#video").attr("checked",<%= @igtick %>)
+
+		$("div#loadmore").click(function()
+		{
+			console.log("Loading..")
+			$.get("http://122.155.187.27:3001/search/<%= @searchtext[1..-1] %>",{utf8:"✓",fb: "<%= @fbparams %>" ,fb: "<%= @twparams %>" ,ig: "<%= @igparams %>" 
+						,gplus:"<%= @gparams %>",offset:""+(parseInt($(this).attr("offset"))+100),layout:"no"}).done(function(data)
+			{
+				$(this).attr("offset",parseInt($(this).attr("offset"))+100)
+				console.log(data)
+				$("div#column").html(data)
+				
+				$("div#column").imagesLoaded(function()
+				{
+					masonload()
+				})
+				masonload()
+			})
+		})
+		function masonload()
+		{
+			alert("mason")
+			$('#column').masonry({
+				itemSelector: '.messagebox',
+				columnWidth: 280
+			});
+		}
+})
+</script>
+	<div class="container" id="column">
+<% end %>
+
+<!-- 1 Tab -->
+<% @data.each do |f| %>
+		<div class="messagebox">
+			<div class="header">
+				<img class="avartar" src="<%= f.profile_picture %>">
+				<%= link_to "#{f.profile_name}", "#{f.profile_url}",:target=> "_blank",:class =>"header-text" %>
+				 <% if f.service_type == "facebook" %>
+				 	<div class="right-side facebook"></div>
+				 <% elsif f.service_type == "twitter" %>
+				 	<div class="right-side twitter"></div>
+				<% elsif f.service_type == "instagram" %>
+					<div class="right-side instagram"></div>
+				<% elsif f.service_type == "googleplus" %>
+					<div class="right-side gplus"></div>
+				<%end%>
+				<div class="right-side font10"> <%= time_ago_in_words(f.post_time) %> ago</div>
+			</div>
+			
+			<hr class="header-line">
+
+			<div class="data">
+				
+				<% if f.type == "photo" || f.type == "link" %>
+				 <div class="media photo">
+					<img class="img-content" src="<%= f.picture_url %>">
+				</div>
+				<div class="text">
+					<%= raw f.message %>
+					<%= link_to 'View', "#{f.source_url}",:target => "_blank" %>
+				</div>
+
+				<% elsif f.type == "video" %>
+					<div class="media video">
+					<% if f.service_type != "googleplus" %>
+	        	                 <video height="160" width="240" controls><source src="<%= f.video_url %>" type="video/mp4">Your browser does not support the video tag.</video>
+	                		<%elsif f.service_type == "googleplus" %>
+					<iframe width="160" height="240" src="<%= f.video_url %>" frameborder="0" allowfullscreen></iframe>
+					<%end%>
+			</div>
+					<div class="text">
+					    <%= raw f.message %>
+					    <%= link_to 'View', "#{f.source_url}",:target => "_blank" %>
+					</div>
+				<%else%>
+
+					<div class ="media message"></div>
+					<div class="text">
+						<%= raw f.message %>
+						<%= link_to 'View', "#{f.source_url}",:target => "_blank" %>
+					</div>
+				<%end%>
+
+			</div>
+		</div>
+<%end%>
+
+<% if @layout != "no" %>
+</div>
+<a href="http://122.155.187.27:3001/search/<%=@searchtext[1..-1]%>?utf8=%E2%9C%93&fb=<%=@fbparams%>&tw=<%=@twparams%>&ig=<%=@igparams%>&gplus=<%=@gparams%>&fb_offset=<%=@fb_id%>&tw_offset=<%=@tw_id%>&gp_offset=<%=@g%>&offset=<%=@nextoffset%>" target="">
+	<div style="font-size:50px;width:50%;height:100px;margin:auto;text-align:center">
+		<h1>
+		Load more
+		</h1>
+	</div>
+</a>
+<% end %>

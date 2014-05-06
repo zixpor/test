@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge"> 
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="">
+ <meta name="author" content="">
+  <link rel="shortcut icon">
+   <%= stylesheet_link_tag    "application", media: "all", "data-turbolinks-track" => false %>
+   <%= javascript_include_tag "application", "data-turbolinks-track" => false %>
+   <%= csrf_meta_tags %>
+
+  	<script> 
+  	$(document).ready(function() 
+  	{ 
+  		//Calling Onload function
+	    OnLoad()
+
+	    //Event For Change button filter
+	    $(".show-hide-btn").click(function(){
+		    $("#filter-bar").toggle("Normal")
+		    $("#plus-btn").toggle() 
+		    $("#minus-btn").toggle()
+	    })
+
+	    //Event For (x) btn
+	    $("#removesearch").click(function(){
+		     $("#Searchbox").val("") 
+	    })
+
+	    //Event For Validate # before Query data
+    	$("#Searchbox").change(function(){
+     		
+     		if($("#Searchbox").val()[0] == "#")
+				$("#Searchbox").val($("#Searchbox").val().split("#")[1])
+     	
+     	})
+
+
+    	//Event For filtering
+		$("input#photo").change(function(){
+			togglemason($(".messagebox .data .photo").parent().parent(),$(this).is(':checked'))
+		})
+
+		$("input#message").change(function(){
+			togglemason($(".messagebox .data .message").parent().parent(),$(this).is(':checked'))
+		})
+
+		$("input#video").change(function(){
+			togglemason($(".messagebox .data .video").parent().parent(),$(this).is(':checked'))
+		})
+
+		$("input#fb").change(function()
+		{
+			togglemason($(".messagebox .header .facebook").parent().parent(),$(this).is(':checked'))
+			if($(this).is(':checked'))
+				$("#isfb").val("1")
+			else
+				$("#isfb").val("0")
+			
+		})
+
+		$("input#tw").click(function()
+		{
+			togglemason($(".messagebox .header .twitter").parent().parent(),$(this).is(':checked'))
+			if($(this).is(':checked'))
+				$("#istw").val("1")
+			else
+				$("#istw").val("0")
+
+		})
+
+		$("input#ig").change(function()
+		{
+			togglemason($(".messagebox .header .instagram").parent().parent(),$(this).is(':checked'))
+			if($(this).is(':checked'))
+				$("#isig").val("1")
+			else
+				$("#isig").val("0")
+		
+		})
+	
+		$("input#gp").change(function()
+		{
+			togglemason($(".messagebox .header .gplus").parent().parent(),$(this).is(':checked'))
+			if($(this).is(':checked'))
+				$("#isgplus").val("1")
+			else
+			{
+				$("#isgplus").val("0")
+				//alert("First")
+			}
+		})
+
+		//Event For masoning column
+		$("#column").imagesLoaded(function(){
+				masonload()
+				masonstop()
+		})
+		$("#searchsubmit").submit(function(){
+				$("#searchsubmit").attr("action","/search/"+$("#Searchbox").val())
+			
+			if($("input#fb").is(':checked'))
+				$("#isfb").val("1")
+			else
+				$("#isfb").val("0")
+
+			if($("input#tw").is(':checked'))
+				$("#istw").val("1")
+			else
+				$("#istw").val("0")
+
+			if($("input#ig").is(':checked'))
+				$("#isig").val("1")
+			else
+				$("#isig").val("0")
+
+			if($("input#gp").is(':checked'))
+				$("#isgplus").val("1")
+			else
+				$("#isgplus").val("0")
+		})
+
+	})
+	
+		hashtag_regexp = /#([^ \`\~\!\@\#\$\%\^\&\*\(\)\-\=\_\+\[\]\\\;\'\,\.\/\{\}\|\:\"\<\>\?]+)/g;
+  	function linkHashtagstwitter(text) {
+		//hashtag_regexp = /#([a-zA-Z0-9]+)/g;
+		return text.replace(hashtag_regexp,'<a class="hashtag" href="https://twitter.com/search?q=%23$1&src=hash">#$1</a>');
+	}
+
+	function linkHashtagsfacebook(text) {
+		//hashtag_regexp = /#([a-zA-Z0-9]+)/g;
+		return text.replace(hashtag_regexp,'<a class="hashtag" href="https://www.facebook.com/hashtag/$1">#$1</a>');
+	}
+
+	function linkHashtagsinstagram(text) {
+		//hashtag_regexp = /#([a-zA-Z0-9]+)/g;
+		return text.replace(hashtag_regexp,'<a class="hashtag" href="/search/$1">#$1</a>');
+	}
+
+	function linkHashtagsgplus(text) {
+		//hashtag_regexp = /#([a-zA-Z0-9]+)/g;
+		return text.replace(hashtag_regexp,'<a class="hashtag" href="https://plus.google.com/s/%23$1">#$1</a>');
+	}
+
+    function OnLoad()
+    { 
+     	//Hide plus btn
+        $("#plus-btn").hide()
+        //Focus Searchbox
+     	$("#Searchbox").focus()
+
+		$("input#message").attr("checked","true")
+		$("input#photo").attr("checked","true")
+		$("input#video").attr("checked","true")
+		
+		$("input#fb").attr("checked","true")
+		$("input#tw").attr("checked","true")
+		$("input#ig").attr("checked","true")
+		$("input#gp").attr("checked","true")
+
+		//Counting Report
+		UpdateResult()
+
+		//For Making Hashtag
+		
+		$("div.messagebox .header .facebook").parent().parent().children(".data").children(".text").each(function() {
+		    $(this).html(linkHashtagsfacebook($(this).html()));
+		});
+
+		$("div.messagebox .header .twitter").parent().parent().children(".data").children(".text").each(function() {
+		    $(this).html(linkHashtagstwitter($(this).html()));
+		});
+
+		$("div.messagebox .header .instagram").parent().parent().children(".data").children(".text").each(function() {
+		    $(this).html(linkHashtagsinstagram($(this).html()));
+		});
+
+		$("div.messagebox .header .gplus").parent().parent().children(".data").children(".text").each(function() {
+		    $(this).html(linkHashtagsgplus($(this).html()));
+		});
+
+
+		masonload()
+
+		masontiming = setInterval(function(){masonload()},2000);
+		
+    }
+
+
+	function masonload()
+	{
+		$('#column').masonry({
+			  itemSelector: '.messagebox',
+			  columnWidth: 280,
+			  isAnimated: true
+			});
+	}
+
+	function masonstop()
+	{
+		clearInterval(masontiming);
+	}
+
+	function togglemason(objlist,hideorshow)
+	{
+			
+		var checkboxsocial = {facebook : $("input#fb").is(':checked'),
+		twitter : $("input#tw").is(':checked'),
+		instagram : $("input#ig").is(':checked'),
+		gplus : $("input#gp").is(':checked')}
+
+		var checkboxtype = {photo : $("input#photo").is(':checked'),
+		message : $("input#message").is(':checked'),
+		video : $("input#video").is(':checked')}
+		console.log(checkboxsocial)
+		console.log(checkboxtype)
+		objlist.each(function()
+		{	
+			var socialtype = $(this).children(".header").children(".right-side").attr("class").split(' ')[1];
+			var mediatype = $(this).children(".data").children().attr("class").split(' ')[1];
+			console.log(socialtype + " " + mediatype)
+			if(checkboxsocial[socialtype] && checkboxtype[mediatype])
+			{
+				console.log("true")
+				$(this).removeClass("masonhidden",1000)
+			} 
+			else
+			{
+				console.log("false")
+				$(this).addClass("masonhidden",1000)
+			}
+		})
+		
+		masonload()
+		UpdateResult()
+	}
+
+
+
+	function UpdateResult()
+	{
+			$("#fbcount").html($(".messagebox:not(.masonhidden) .facebook").length+"")
+			$("#twitcount").html($(".messagebox:not(.masonhidden) .twitter").length+"")
+			$("#igcount").html($(".messagebox:not(.masonhidden) .instagram").length+"")
+			$("#gpluscount").html($(".messagebox:not(.masonhidden) .gplus").length+"")
+	}
+
+    </script>
+
+  <title>Hashtag</title>
+</head>
+<body>
+	<nav class="navbar navbar-default" role="navigation" style="background-color:#2A7F86;border-color:#1B8DD0">
+                            <div class="container-fluid">
+                               <!-- Brand and toggle get grouped for better mobile display -->
+                                <div class="navbar-header">
+                                   <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                                      <span class="sr-only">Toggle navigation</span>
+                                       <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                         <span class="icon-bar"></span>
+	                                </button>
+					<a class="navbar-brand" href="/" style="">Hashtag # Search</a>
+	                               </div>
+	   
+	                                 <!-- Collect the nav links, forms, and other content for toggling -->
+	                                  <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+	      
+	                                      <ul class="nav navbar-nav navbar-right" style="margin-right:5%">
+											<%= form_tag("/search",:method => 'get', :class => "navbar-form navbar-left", :style => "margin-top:5px;margin-bottom:5px;width:500px !important",:id=>"searchsubmit") do %> 
+		                                
+		                                           <div>
+		                                                    <button type="submit" class="search-link" ><span class="rightsearch glyphicon glyphicon-search"></span></button>
+		                                     
+														     <span class="removesearch glyphicon glyphicon-remove-circle" id="removesearch"></span>
+										                                     
+														     <input type="text" id="Searchbox" class="roundsearch" placeholder="Type Search #Tag" value="<% if @searchtext %><%= @searchtext[1..-1]  %><% end %>">
+															 <input type="hidden" id="isfb" name="fb" value="1">
+															 <input type="hidden" id="istw" name="tw" value="1">
+															 <input type="hidden" id="isig" name="ig" value="1">
+															 <input type="hidden" id="isgplus" name="gplus" value="1">
+
+		                                                       <div class="leftsearch"></div>
+		                                            </div>
+		                                     <%end%>
+						     
+			                                </ul>
+			                               </div><!-- /.navbar-collapse -->
+			                              </div><!-- /.container-fluid -->
+			                             </nav>
+			                              <div class="container" style="">
+			                                       <div class="well" style="min-height:80px;background-color: #E8FBFF;border-radius:10px">
+			       
+			                                                 <div class="right-side show-hide-btn" id="plus-btn"><span class="glyphicon glyphicon-plus"></span></div>
+				                                          <div class="right-side show-hide-btn" id="minus-btn"><span class="glyphicon glyphicon-minus"></span></div>
+				  
+				                                            <h1 style="font-family:'century gothic'">Filter Option</h1>
+				                                             <div id="filter-bar" class="filter-bar">
+				                                                      <div class="filter-form">
+																		<input type="checkbox" class="radio-lg" id="message"> Message <br>
+																		<input type="checkbox" class="radio-lg" id="photo"> Photo <br>
+																		<input type="checkbox" class="radio-lg" id="video"> Video <br>
+																      </div>
+
+
+											                        <div class="filter-form2">
+											                            <input type="checkbox" class="radio-lg" id="fb"> Facebook <br>
+											                            <input type="checkbox" class="radio-lg" id="tw"> Twitter <br>
+											                            <input type="checkbox" class="radio-lg" id="ig"> Instagram <br>
+											                            <input type="checkbox" class="radio-lg" id="gp"> Google+ <br>
+											                        </div>
+
+																      <div id="" class="report">
+																			<b>Total Result</b>  	<br>
+																			Facebook <span id="fbcount"></span><br>
+																			Twitter <span id="twitcount"></span><br>
+																			Instragram <span id="igcount"></span><br>
+																			Google Plus <span id="gpluscount"></span><br>
+																       </div>
+									     </div>
+ 
+                        					 </div>
+                           			   </div>
+
+<%= yield %>
+</body>
+</html>
