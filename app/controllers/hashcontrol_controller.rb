@@ -291,7 +291,7 @@ end
 
 	def  index
 		p "1111"
-		redirect_to instagram_auth_path if @@access_token == ''
+		#redirect_to instagram_auth_path if @@access_token == ''
 	end
 
 	def search
