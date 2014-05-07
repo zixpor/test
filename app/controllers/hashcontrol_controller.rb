@@ -331,7 +331,7 @@ end
 		p 'before call instagram'
 		igoffset = false
 		igoffset = true if params[:offset]
-		@IG = instagram_search(params[:data].to_s,igoffset)
+		#@IG = instagram_search(params[:data].to_s,igoffset)
 				
 	end
 	#------------------------------------------------------------------------
